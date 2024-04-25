@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SQL 맵퍼 파일은 XML이기 때문에 제일 먼저 XML 선언이 옵니다. -->
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Mapper 인터페이스의 패키지명과 이름을 namespace로 설정합니다. -->
+<mapper namespace="com.naver.myhome.mybatis.mapper.MemberMapper">
+	<!-- 
+		1. 태그에 id 속성은 Mapper 인터페이스에 사용된 메서드 명과 동일하게 작성됩니다.
+		2. resultType 속성은 Mapper 인터페이스에 사용된 메서드의 반환 타입을 작성해줍니다.
+		3. 별칭은 대소문자 구분하지 않습니다.
+	 -->
+	<select id="isId" resultType="member">
+		SELECT * FROM member WHERE id = #{id}
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO member(id, password, name, age, gender, email) VALUES(#{id},#{password},#{name},#{age},#{gender},#{email})
+	</insert>
+	
+	<update id="update">
+		update member 
+		set	name = #{name}, age = #{age}, 
+			gender = #{gender}, email = #{email}
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from member where id = #{id}
+	</delete>
+		
+	<select id="getSearchListCount" resultType="int">
+		select count(*)
+		from member
+		where id != 'admin'
+		<if test="search_field != null">
+			and
+			<choose>
+				<when test="search_field=='id'">id</when>
+				<when test="search_field=='name'">name</when>
+				<when test="search_field=='age'">age</when>
+				<when test="search_field=='gender'">gender</when>
+			</choose>
+			like #{search_word}
+		</if>
+	</select>
+	
+	<select id="getSearchList" resultType="member">
+		select * 
+		from   (select b.*, rownum rnum
+				from (select * 
+					  from member 
+					  where id != 'admin'
+						  <if test="search_field != null">
+								and
+								<choose>
+									<when test="search_field=='id'">id</when>
+									<when test="search_field=='name'">name</when>
+									<when test="search_field=='age'">age</when>
+									<when test="search_field=='gender'">gender</when>
+								</choose>
+								like #{search_word}
+						  </if>
+					  order by id
+					  )b
+				where rownum &lt;= #{end}
+			)
+		where rnum &gt;= #{start} and rnum &lt;= #{end}
+	</select>
+	
+</mapper>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?><!-- SQL 맵퍼 파일은 XML이기 때문에 제일 먼저 XML 선언이 옵니다. -->
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Mapper 인터페이스의 패키지명과 이름을 namespace로 설정합니다. -->
+<mapper namespace="com.naver.myhome.mybatis.mapper.CommentMapper">
+
+	<select id="getListCount" resultType="int">
+		select count(*)
+		from comments
+		where board_num = #{board_num}
+	</select>
+
+	<insert id="commentsInsert">
+		insert into comments
+		values(com_seq.nextval, #{id}, #{content}, sysdate, #{board_num})
+	</insert>
+
+	<select id="getCommentList" resultType="comment">
+		select *
+		from (select rownum rnum, num, id, content, reg_date, board_num
+			  from (
+			  		select num, id, content, reg_date, board_num
+			  		from comments
+			  		where board_num = #{board_num}
+			  		order by reg_date desc
+					)
+			  )
+		where rnum between #{start} and #{end}
+	</select>
+
+	<update id="commentsUpdate">
+		update comments
+		set	   content=#{content}
+		where  num = #{num}
+	</update>
+
+	<delete id="commentsDelete">
+		delete comments
+		where  num = #{num}
+	</delete>
+
+</mapper>
